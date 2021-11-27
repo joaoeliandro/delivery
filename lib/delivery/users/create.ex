@@ -1,5 +1,5 @@
 defmodule Delivery.Users.Create do
-  alias Delivery.{Repo, User}
+  alias Delivery.{Error, Repo, User}
 
   def call(params) do
     params
@@ -11,6 +11,6 @@ defmodule Delivery.Users.Create do
   defp handle_insert({:ok, %User{}} = result), do: result
 
   defp handle_insert({:error, reason}) do
-    {:error, %{status: :bad_request, reason: reason}}
+    {:error, Error.build(:bad_request, reason)}
   end
 end
