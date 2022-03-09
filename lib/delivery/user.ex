@@ -7,6 +7,7 @@ defmodule Delivery.User do
   @primary_key {:id, :binary_id, autogenerate: true}
 
   @required_params [:name, :cpf, :age, :email, :password, :address, :cep]
+  @update_params @required_params -- [:password]
 
   @derive {Jason.Encoder, only: [:id, :name, :age, :cpf, :email, :address, :cep]}
 
@@ -23,8 +24,8 @@ defmodule Delivery.User do
     timestamps()
   end
 
-  def changeset(struct \\ %__MODULE__{}, params) do
-    struct
+  def changeset(params) do
+    %__MODULE__{}
     |> cast(params, @required_params)
     |> validate_required(@required_params)
     |> validate_length(:password, min: 8)
@@ -34,6 +35,17 @@ defmodule Delivery.User do
     |> unique_constraint([:cpf])
     |> unique_constraint([:email])
     |> put_password_hash()
+  end
+
+  def changeset(struct, params) do
+    struct
+    |> cast(params, @update_params)
+    |> validate_required(@update_params)
+    |> validate_length(:cep, is: 8)
+    |> validate_length(:cpf, is: 11)
+    |> validate_number(:age, greater_than_or_equal_to: 18)
+    |> unique_constraint([:cpf])
+    |> unique_constraint([:email])
   end
 
   defp put_password_hash(%Changeset{valid?: true, changes: %{password: password}} = changeset) do
